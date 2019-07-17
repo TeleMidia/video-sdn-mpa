@@ -8,16 +8,12 @@ from ryu.lib.mac import haddr_to_bin
 from ryu.lib.packet import packet
 from ryu.lib.packet import arp
 from ryu.lib.packet import ethernet
-from ryu.lib.packet import ipv4
 from ryu.lib.packet import ipv6
 from ryu.lib.packet import ether_types
 from ryu.lib import mac, ip
-from ryu.topology.api import get_switch, get_link
-from ryu.app.wsgi import ControllerBase
 from ryu.topology import event
 
 from collections import defaultdict
-from operator import itemgetter
 
 import os
 import random
@@ -63,7 +59,7 @@ class ProjectController(app_manager.RyuApp):
                     paths.append(path + [next])
                 else:
                     stack.append((next, path + [next]))
-        print "Available paths from ", src, " to ", dst, " : ", paths
+        print ("Available paths from ", src, " to ", dst, " : ", paths)
         #retorna os caminhos encontrados
         return paths
 
@@ -140,13 +136,13 @@ class ProjectController(app_manager.RyuApp):
         #mostra o custo dos caminhos
         for path in paths:
             pw.append(self.get_path_cost(path))
-            print path, "cost = ", pw[len(pw) - 1]
+            print (path, "cost = ", pw[len(pw) - 1])
         #soma dos custos dos caminhos
         sum_of_pw = sum(pw) * 1.0
         paths_with_ports = self.add_ports_to_paths(paths, first_port, last_port)
         #uniao todos os swithces dos caminhos
         switches_in_paths = set().union(*paths)
-        print "switches_in_paths: ", switches_in_paths
+        print ("switches_in_paths: ", switches_in_paths)
 
         for node in switches_in_paths:
 
@@ -162,9 +158,9 @@ class ProjectController(app_manager.RyuApp):
                 if node in path:
                     in_port = path[node][0]
                     out_port = path[node][1]
-                    print "pw antes do if: ",pw[i]
+                    print ("pw antes do if: ",pw[i])
                     if (out_port, pw[i]) not in ports[in_port]:
-                        print "pw: ",pw[i]
+                        print ("pw: ",pw[i])
                         ports[in_port].append((out_port, pw[i]))
                 i += 1
 
@@ -195,7 +191,7 @@ class ProjectController(app_manager.RyuApp):
                     group_id = self.multipath_group_ids[node, src, dst]
 
                     buckets = []
-                    print "node at ",node," out ports : ",out_ports
+                    print ("node at ",node," out ports : ",out_ports)
                     for port, weight in out_ports:
                         bucket_weight = int(round((1 - weight/sum_of_pw) * 10))
                         bucket_action = [ofp_parser.OFPActionOutput(port)]
@@ -230,7 +226,7 @@ class ProjectController(app_manager.RyuApp):
 
                     self.add_flow(dp, 32768, match_ip, actions)
                     self.add_flow(dp, 1, match_arp, actions)
-        print "Path installation finished in ", time.time() - computation_start 
+        print ("Path installation finished in ", time.time() - computation_start)
         return paths_with_ports[0][src][1]
 
     def add_flow(self, datapath, priority, match, actions, buffer_id=None):
@@ -251,7 +247,7 @@ class ProjectController(app_manager.RyuApp):
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def _switch_features_handler(self, ev):
-        print "switch_features_handler is called"
+        print ("switch_features_handler is called")
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
@@ -345,7 +341,7 @@ class ProjectController(app_manager.RyuApp):
 
     @set_ev_cls(event.EventSwitchLeave, MAIN_DISPATCHER)
     def switch_leave_handler(self, ev):
-        print ev
+        print (ev)
         switch = ev.switch.dp.id
         if switch in self.switches:
             self.switches.remove(switch)
