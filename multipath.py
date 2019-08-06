@@ -96,10 +96,6 @@ class ProjectController(app_manager.RyuApp):
 
     def add_ports_to_paths(self, paths, first_port, last_port):
         '''
-        Adicionando as portas que conecta, os switches para todos os caminhos
-        Eu nao entendi pra que isso serve, na verdade nem entendi oq eh,
-        acho que eh pra conhecer todas as portas e saber por onde enviar.
-
         Add the ports that connects the switches for all paths
         '''
         paths_p = []
